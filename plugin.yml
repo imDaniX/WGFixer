@@ -1,0 +1,6 @@
+name: WGFixer
+main: ru.intervi.wgfixer.Main
+version: 1.0
+description: фикс WorldGuard
+author: InterVi
+
