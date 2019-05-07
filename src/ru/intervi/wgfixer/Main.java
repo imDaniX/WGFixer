@@ -5,73 +5,112 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.entity.Player;
 
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.User;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
-	private WorldGuardPlugin wg = null;
-	
+	private WorldGuard wg = null;
+	private Essentials ess = (Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
 	@Override
 	public void onEnable() {
 		if (!Bukkit.getOnlineMode()) {
 			getServer().getPluginManager().registerEvents(this, this);
-			wg = getWorldGuard();
+			wg = WorldGuard.getInstance();
 		}
-	}
-	
-	private WorldGuardPlugin getWorldGuard() { //получить WorldGuard
-	    Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
-	 
-	    // WorldGuard may not be loaded
-	    if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
-	        return null; // Maybe you want throw an exception instead
-	    }
-	 
-	    return (WorldGuardPlugin) plugin;
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
-		String msg[] = event.getMessage().toLowerCase().split(" ");
-		if (msg.length < 4 || (!msg[0].equals("rg") || !msg[0].equals("region"))) return;
-		UUID uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + msg[3]).getBytes());
-		if (Bukkit.getOfflinePlayer(uuid).isOnline()) return;
 		Player player = event.getPlayer();
-		ProtectedRegion rg = wg.getRegionManager(player.getWorld()).getRegion(msg[2]);
+		String msg[] = event.getMessage().toLowerCase().split(" ");
+		if (
+				msg.length < 4 
+				|| 
+				!(((msg[0].equals("/rg") || msg[0].equals("/region") || msg[0].equals("/regions") || msg[0].equals("/worldguard:rg") || msg[0].equals("/worldguard:region") || msg[0].equals("/worldguard:regions")) 
+				&&
+				(msg[1].equals("removeowner") || msg[1].equals("ro") || msg[1].equals("removemember") || msg[1].equals("rm") || msg[1].equals("remmember") || msg[1].equals("removemem") || msg[1].equals("remmem") || msg[1].equals("addowner") || msg[1].equals("ao") || msg[1].equals("addmember") || msg[1].equals("am") || msg[1].equals("addmem"))) 
+				&&
+				!msg[3].equals("-a"))
+			) return;
+		User essUser = ess.getOfflineUser(msg[3]);
+		if (essUser == null) { 
+			player.sendMessage("Игрока " + msg[3] + " ещё небыло на сервере!");
+			event.setCancelled(true);
+		}
+		else {
+		UUID uuid = essUser.getConfigUUID();
+		if (Bukkit.getOfflinePlayer(uuid).isOnline()) return;
+		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(msg[2]);
 		if (rg == null) {
-			player.sendMessage("invalid region " + msg[2]);
+			player.sendMessage(ChatColor.RED.toString() + "Неизвестный регион " + msg[2]);
 			return;
 		}
-		if (msg[1].equals("removeowner")) {
+		if (msg[1].equals("removeowner") || msg[1].equals("ro")){
 			if (
-					!(rg.getOwners().contains(player.getUniqueId()) && (player.hasPermission("worldguard.region.removeowner.own.*") || player.hasPermission("worldguard.region.removeowner.*")))
+					!((rg.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.removeowner.own.*"))
+					|| 
+					player.hasPermission("worldguard.region.removeowner.*")
 					||
-					!(rg.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.removeowner.member.*"))
+					(rg.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.removeowner.member.*")))
 				) return;
 			rg.getOwners().removePlayer(uuid);
-			player.sendMessage("owner " + msg[3] + " removing from " + msg[2]);
+			player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " удалён из владельцев " + msg[2]);
 			try {
-				if (!wg.getRegionManager(player.getWorld()).saveChanges()) player.sendMessage("error, not saved");
+				if (!wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).saveChanges()) player.sendMessage("error, not saved");
 			} catch(Exception e) {e.printStackTrace();}
 			event.setCancelled(true);
-		} else if (msg[1].equals("removemember")) {
+		} else if (msg[1].equals("removemember") || msg[1].equals("rm") || msg[1].equals("remmember") || msg[1].equals("removemem") || msg[1].equals("remmem")) {
 			if (
-					!(rg.getOwners().contains(player.getUniqueId()) && (player.hasPermission("worldguard.region.removemember.own.*") || player.hasPermission("worldguard.region.removemember.*")))
+					!((rg.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.removemember.own.*"))
+					|| 
+					player.hasPermission("worldguard.region.removemember.*")
 					||
-					!(rg.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.removemember.member.*"))
+					(rg.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.removemember.member.*")))
 				) return;
 			rg.getMembers().removePlayer(uuid);
-			player.sendMessage("member " + msg[3] + " removing from " + msg[2]);
+			player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " удалён из участников " + msg[2]);
 			try {
-				if (!wg.getRegionManager(player.getWorld()).saveChanges()) player.sendMessage("error, not saved");
+				if (!wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).saveChanges()) player.sendMessage("error, not saved");
 			} catch(Exception e) {e.printStackTrace();}
 			event.setCancelled(true);
+		} else if (msg[1].equals("addowner") || msg[1].equals("ao")) {
+			if (
+					!((rg.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.addowner.own.*"))
+					|| 
+					player.hasPermission("worldguard.region.addowner.*")
+					||
+					(rg.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.addowner.member.*")))
+				) return;
+			rg.getOwners().addPlayer(uuid);
+			player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " добавлен во владельцы " + msg[2]);
+			try {
+				if (!wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).saveChanges()) player.sendMessage("error, not saved");
+			} catch(Exception e) {e.printStackTrace();}
+			event.setCancelled(true);
+		} else if (msg[1].equals("addmember") || msg[1].equals("am") || msg[1].equals("addmem")) {
+			if (
+					!((rg.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.addmember.own.*"))
+					|| 
+					player.hasPermission("worldguard.region.addmember.*")
+					||
+					(rg.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region.addmember.member.*"))) 
+				) return;
+			rg.getMembers().addPlayer(uuid);
+			player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " добавлен в участники " + msg[2]);
+			try {
+				if (!wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).saveChanges()) player.sendMessage("error, not saved");
+			} catch(Exception e) {e.printStackTrace();}
+			event.setCancelled(true);
+			}
 		}
 	}
 }
