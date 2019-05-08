@@ -54,7 +54,7 @@ public class Main extends JavaPlugin implements Listener {
 			) return;
 		User essUser = ess.getOfflineUser(msg[3]);
 		if (essUser == null) { 
-			player.sendMessage("Игрока " + msg[3] + " ещё небыло на сервере!");
+			player.sendMessage(ChatColor.RED + "Игрока " + msg[3] + " ещё небыло на сервере!");
 			event.setCancelled(true);
 			return;
 		}
@@ -71,33 +71,33 @@ public class Main extends JavaPlugin implements Listener {
 				if (!canAffect(rg, "removeowner", player))
 					return;
 				rg.getOwners().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из владельцев " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из владельцев " + msg[2] + ".");
 				break;
 			}
 			case "removemember": case "rm": case "remmember": case "removemem": case"remmem": {
 				if (!canAffect(rg, "removemember", player))
 					return;
 				rg.getMembers().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из участников " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из участников " + msg[2] + ".");
 				break;
 			}
 			case "addowner": case "ao": {
 				if (!canAffect(rg, "addowner", player))
 					return;
 				rg.getOwners().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен во владельцы " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен во владельцы " + msg[2] + ".");
 				break;
 			}
 			case "addmember": case "am": case "addmem": {
 				if (!canAffect(rg, "addmember", player))
 					return;
 				rg.getMembers().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен в участники " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен в участники " + msg[2] + ".");
 				break;
 			}
 		}
 		if(!saveChanges(player.getWorld()))
-			player.sendMessage(ChatColor.RED+"Error, not saved");
+			player.sendMessage(ChatColor.RED+"При попытке сохранения была найдена ошибка! Попробуйте позже.");
 		event.setCancelled(true);
 	}
 
