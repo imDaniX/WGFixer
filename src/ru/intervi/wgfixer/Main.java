@@ -31,7 +31,13 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		Bukkit.getPluginManager().disablePlugin(this);
 	}
-	
+
+	/*
+		TODO:
+		Добавить поддержку указания мира.
+		В WorldGuard есть аргумент -w, который позволяет редактировать регион в другом мире.
+		Например /rg addowner spawn -w world_the_end Vasya_Pupkin2001
+	*/
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
 		Player player = event.getPlayer();
@@ -52,7 +58,8 @@ public class Main extends JavaPlugin implements Listener {
 			return;
 		}
 		UUID uuid = essUser.getConfigUUID();
-		if (Bukkit.getOfflinePlayer(uuid).isOnline()) return;
+		if (Bukkit.getOfflinePlayer(uuid).isOnline())
+			return;
 		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(msg[2]);
 		if (rg == null) {
 			player.sendMessage(ChatColor.RED.toString() + "Неизвестный регион " + msg[2]);
@@ -66,40 +73,37 @@ public class Main extends JavaPlugin implements Listener {
 				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " удалён из владельцев " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
-				event.setCancelled(true);
 				break;
 			}
-			case "removemember": case"rm": case"remmember": case "removemem": case"remmem": {
+			case "removemember": case "rm": case "remmember": case "removemem": case"remmem": {
 				if (!canAffect(rg, "removemember", player))
 					return;
 				rg.getMembers().removePlayer(uuid);
 				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " удалён из участников " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
-				event.setCancelled(true);
 				break;
 			}
-			case "addowner": case"ao": {
+			case "addowner": case "ao": {
 				if (!canAffect(rg, "addowner", player))
 					return;
 				rg.getOwners().addPlayer(uuid);
 				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " добавлен во владельцы " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
-				event.setCancelled(true);
 				break;
 			}
-			case "addmember": case "am": case"addmem": {
+			case "addmember": case "am": case "addmem": {
 				if (!canAffect(rg, "addmember", player))
 					return;
 				rg.getMembers().addPlayer(uuid);
 				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " добавлен в участники " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
-				event.setCancelled(true);
 				break;
 			}
 		}
+		event.setCancelled(true);
 	}
 
 	private boolean saveChanges(World world) {
