@@ -29,6 +29,7 @@ public class Main extends JavaPlugin implements Listener {
 			wg = WorldGuard.getInstance();
 			return;
 		}
+		getLogger().info("This server uses online-mode true. Plugin will be disabled.");
 		Bukkit.getPluginManager().disablePlugin(this);
 	}
 
@@ -62,15 +63,15 @@ public class Main extends JavaPlugin implements Listener {
 			return;
 		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(msg[2]);
 		if (rg == null) {
-			player.sendMessage(ChatColor.RED.toString() + "Неизвестный регион " + msg[2]);
+			player.sendMessage(ChatColor.RED + "Неизвестный регион " + msg[2]);
 			return;
 		}
 		switch (msg[1]) {
-			case "removeowner" : case "ro": {
+			case "removeowner": case "ro": {
 				if (!canAffect(rg, "removeowner", player))
 					return;
 				rg.getOwners().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " удалён из владельцев " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из владельцев " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
 				break;
@@ -79,7 +80,7 @@ public class Main extends JavaPlugin implements Listener {
 				if (!canAffect(rg, "removemember", player))
 					return;
 				rg.getMembers().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " удалён из участников " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из участников " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
 				break;
@@ -88,7 +89,7 @@ public class Main extends JavaPlugin implements Listener {
 				if (!canAffect(rg, "addowner", player))
 					return;
 				rg.getOwners().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " добавлен во владельцы " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен во владельцы " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
 				break;
@@ -97,7 +98,7 @@ public class Main extends JavaPlugin implements Listener {
 				if (!canAffect(rg, "addmember", player))
 					return;
 				rg.getMembers().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN.toString() + msg[3] + " добавлен в участники " + msg[2]);
+				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен в участники " + msg[2]);
 				if(!saveChanges(player.getWorld()))
 					player.sendMessage("error, not saved");
 				break;
