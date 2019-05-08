@@ -29,7 +29,7 @@ public class Main extends JavaPlugin implements Listener {
 			wg = WorldGuard.getInstance();
 			return;
 		}
-		getLogger().info("This server uses online-mode true. Plugin will be disabled.");
+		getLogger().info("This server uses online-mode=true. Plugin will be disabled.");
 		Bukkit.getPluginManager().disablePlugin(this);
 	}
 
@@ -72,8 +72,6 @@ public class Main extends JavaPlugin implements Listener {
 					return;
 				rg.getOwners().removePlayer(uuid);
 				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из владельцев " + msg[2]);
-				if(!saveChanges(player.getWorld()))
-					player.sendMessage("error, not saved");
 				break;
 			}
 			case "removemember": case "rm": case "remmember": case "removemem": case"remmem": {
@@ -81,8 +79,6 @@ public class Main extends JavaPlugin implements Listener {
 					return;
 				rg.getMembers().removePlayer(uuid);
 				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из участников " + msg[2]);
-				if(!saveChanges(player.getWorld()))
-					player.sendMessage("error, not saved");
 				break;
 			}
 			case "addowner": case "ao": {
@@ -90,8 +86,6 @@ public class Main extends JavaPlugin implements Listener {
 					return;
 				rg.getOwners().addPlayer(uuid);
 				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен во владельцы " + msg[2]);
-				if(!saveChanges(player.getWorld()))
-					player.sendMessage("error, not saved");
 				break;
 			}
 			case "addmember": case "am": case "addmem": {
@@ -99,11 +93,11 @@ public class Main extends JavaPlugin implements Listener {
 					return;
 				rg.getMembers().addPlayer(uuid);
 				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен в участники " + msg[2]);
-				if(!saveChanges(player.getWorld()))
-					player.sendMessage("error, not saved");
 				break;
 			}
 		}
+		if(!saveChanges(player.getWorld()))
+			player.sendMessage(ChatColor.RED+"Error, not saved");
 		event.setCancelled(true);
 	}
 
