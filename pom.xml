@@ -6,12 +6,12 @@
 
     <groupId>ru.intervi.wgfixer</groupId>
     <artifactId>WGFixer</artifactId>
-    <version>4.0</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <name>WGFixer</name>
 
-    <description>Fixing uuid for offline servers</description>
+    <description>Fixing UUID for WorldGuard for servers with online-mode false</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
