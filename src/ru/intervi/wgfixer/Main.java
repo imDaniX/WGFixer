@@ -63,7 +63,7 @@ public class Main extends JavaPlugin implements Listener {
 			return;
 		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(msg[2]);
 		if (rg == null) {
-			player.sendMessage(ChatColor.RED + "Неизвестный регион " + msg[2]);
+			player.sendMessage(ChatColor.RED + "Неизвестный регион " + msg[2] + ".");
 			return;
 		}
 		switch (msg[1]) {
