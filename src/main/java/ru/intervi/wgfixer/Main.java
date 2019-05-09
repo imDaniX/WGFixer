@@ -59,7 +59,7 @@ public class Main extends JavaPlugin implements Listener {
 			return;
 		}
 		UUID uuid = essUser.getConfigUUID();
-		if (Bukkit.getOfflinePlayer(uuid).isOnline())
+		if (Bukkit.getPlayer(uuid) != null)
 			return;
 		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(msg[2]);
 		if (rg == null) {
