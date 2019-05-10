@@ -54,7 +54,7 @@ public class Main extends JavaPlugin implements Listener {
 		if(cmd[1]==null)
 			return;
 		User essUser = ess.getOfflineUser(cmd[3]);
-		if (essUser == null) { 
+		if (essUser == null) {
 			player.sendMessage(ChatColor.RED + "Игрока " + cmd[3] + " ещё небыло на сервере!");
 			event.setCancelled(true);
 			return;
@@ -65,10 +65,14 @@ public class Main extends JavaPlugin implements Listener {
 		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(cmd[2]);
 		if (rg == null) {
 			player.sendMessage(ChatColor.RED + "Неизвестный регион " + cmd[2] + ".");
+			event.setCancelled(true);
 			return;
 		}
-		if (!canAffect(rg, cmd[1], player))
+		if (!canAffect(rg, cmd[1], player)) {
+			player.sendMessage(ChatColor.RED + "У вас недостаточно прав, чтобы сделать это.");
+			event.setCancelled(true);
 			return;
+		}
 		switch (cmd[1]) {
 			case "removeowner": {
 				rg.getOwners().removePlayer(uuid);
