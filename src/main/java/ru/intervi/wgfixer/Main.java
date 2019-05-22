@@ -42,57 +42,52 @@ public class Main extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
 		Player player = event.getPlayer();
-		String[] msg = event.getMessage().toLowerCase().split(" ");
+		String[] cmd = event.getMessage().toLowerCase().split(" ");
 		if (
-				msg.length < 4 
+				cmd.length < 4
 				|| 
-				!(((msg[0].equals("/rg") || msg[0].equals("/region") || msg[0].equals("/regions") || msg[0].equals("/worldguard:rg") || msg[0].equals("/worldguard:region") || msg[0].equals("/worldguard:regions")) 
+				!((cmd[0].equals("/rg") || cmd[0].equals("/region") || cmd[0].equals("/regions") || cmd[0].equals("/worldguard:rg") || cmd[0].equals("/worldguard:region") || cmd[0].equals("/worldguard:regions"))
 				&&
-				(msg[1].equals("removeowner") || msg[1].equals("ro") || msg[1].equals("removemember") || msg[1].equals("rm") || msg[1].equals("remmember") || msg[1].equals("removemem") || msg[1].equals("remmem") || msg[1].equals("addowner") || msg[1].equals("ao") || msg[1].equals("addmember") || msg[1].equals("am") || msg[1].equals("addmem"))) 
-				&&
-				!msg[3].equals("-a"))
+				!cmd[3].equals("-a"))
 			) return;
-		User essUser = ess.getOfflineUser(msg[3]);
+		cmd[1]=getAction(cmd[1]);
+		if(cmd[1]==null)
+			return;
+		User essUser = ess.getOfflineUser(cmd[3]);
 		if (essUser == null) { 
-			player.sendMessage(ChatColor.RED + "Игрока " + msg[3] + " ещё небыло на сервере!");
+			player.sendMessage(ChatColor.RED + "Игрока " + cmd[3] + " ещё небыло на сервере!");
 			event.setCancelled(true);
 			return;
 		}
 		UUID uuid = essUser.getConfigUUID();
-		if (Bukkit.getOfflinePlayer(uuid).isOnline())
+		if (Bukkit.getPlayer(uuid) != null)
 			return;
-		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(msg[2]);
+		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(cmd[2]);
 		if (rg == null) {
-			player.sendMessage(ChatColor.RED + "Неизвестный регион " + msg[2] + ".");
+			player.sendMessage(ChatColor.RED + "Неизвестный регион " + cmd[2] + ".");
 			return;
 		}
-		switch (msg[1]) {
-			case "removeowner": case "ro": {
-				if (!canAffect(rg, "removeowner", player))
-					return;
+		if (!canAffect(rg, cmd[1], player))
+			return;
+		switch (cmd[1]) {
+			case "removeowner": {
 				rg.getOwners().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из владельцев " + msg[2] + ".");
+				player.sendMessage(ChatColor.GREEN + cmd[3] + " удалён из владельцев " + cmd[2] + ".");
 				break;
 			}
-			case "removemember": case "rm": case "remmember": case "removemem": case"remmem": {
-				if (!canAffect(rg, "removemember", player))
-					return;
+			case "removemember": {
 				rg.getMembers().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " удалён из участников " + msg[2] + ".");
+				player.sendMessage(ChatColor.GREEN + cmd[3] + " удалён из участников " + cmd[2] + ".");
 				break;
 			}
-			case "addowner": case "ao": {
-				if (!canAffect(rg, "addowner", player))
-					return;
+			case "addowner": {
 				rg.getOwners().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен во владельцы " + msg[2] + ".");
+				player.sendMessage(ChatColor.GREEN + cmd[3] + " добавлен во владельцы " + cmd[2] + ".");
 				break;
 			}
-			case "addmember": case "am": case "addmem": {
-				if (!canAffect(rg, "addmember", player))
-					return;
+			case "addmember": {
 				rg.getMembers().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + msg[3] + " добавлен в участники " + msg[2] + ".");
+				player.sendMessage(ChatColor.GREEN + cmd[3] + " добавлен в участники " + cmd[2] + ".");
 				break;
 			}
 		}
@@ -100,7 +95,15 @@ public class Main extends JavaPlugin implements Listener {
 			player.sendMessage(ChatColor.RED+"При попытке сохранения была найдена ошибка! Попробуйте позже.");
 		event.setCancelled(true);
 	}
-
+	private String getAction(String arg) {
+		switch (arg) {
+			case "removeowner": case "ro": return "removeowner";
+			case "removemember": case "rm": case "remmember": case "removemem": case "remmem": return "removemember";
+			case "addowner": case "ao": return "addowner";
+			case "addmember": case "am": case "addmem": return "addmemver";
+			default: return null;
+		}
+	}
 	private boolean saveChanges(World world) {
 		try {
 			wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world)).saveChanges();
