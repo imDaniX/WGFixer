@@ -74,7 +74,7 @@ public class Main extends JavaPlugin implements Listener {
 				}
 				world=Bukkit.getWorld(cmd[i+1]);
 				if(world==null) {
-					player.sendMessage(ChatColor.RED + "Вы не указали несуществующий мир.");
+					player.sendMessage(ChatColor.RED + "Вы указали несуществующий мир.");
 					event.setCancelled(true);
 					return;
 				}
@@ -172,10 +172,11 @@ public class Main extends JavaPlugin implements Listener {
 	}
 
 	private boolean canAffect(ProtectedRegion region, String action, Player player) {
-		return (region.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".own."+region.getId()))
+		String id = region.getId().toLowerCase();
+		return (region.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".own."+id))
 				||
-				player.hasPermission("worldguard.region."+action+"."+region.getId())
+				player.hasPermission("worldguard.region."+action+"."+id)
 				||
-				(region.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".member."+region.getId()));
+				(region.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".member."+id));
 	}
 }
