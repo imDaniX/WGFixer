@@ -19,6 +19,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
+	private final UUID ZERO_UUID=UUID.fromString("00000000-0000-0000-0000-000000000000");
 	private WorldGuard wg;
 	private Essentials ess;
 	@Override
@@ -33,72 +34,123 @@ public class Main extends JavaPlugin implements Listener {
 		Bukkit.getPluginManager().disablePlugin(this);
 	}
 
-	/*
-		TODO:
-		Добавить поддержку указания мира.
-		В WorldGuard есть аргумент -w, который позволяет редактировать регион в другом мире.
-		Например /rg addowner spawn -w world_the_end Vasya_Pupkin2001
-	*/
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
-		Player player = event.getPlayer();
+		Player player=event.getPlayer();
 		String[] cmd = event.getMessage().toLowerCase().split(" ");
+		// Является ли введенная команда командой WG
 		if (
 				cmd.length < 4
 				|| 
-				!((cmd[0].equals("/rg") || cmd[0].equals("/region") || cmd[0].equals("/regions") || cmd[0].equals("/worldguard:rg") || cmd[0].equals("/worldguard:region") || cmd[0].equals("/worldguard:regions"))
-				&&
-				!cmd[3].equals("-a"))
+				!((cmd[0].equals("/rg") || cmd[0].equals("/region") || cmd[0].equals("/regions") || cmd[0].equals("/worldguard:rg") || cmd[0].equals("/worldguard:region") || cmd[0].equals("/worldguard:regions")))
 			) return;
-		cmd[1]=getAction(cmd[1]);
-		if(cmd[1]==null)
+		// Редактируются ли участники или владельцы региона
+		String action=getAction(cmd[1]);
+		if(action==null)
 			return;
-		User essUser = ess.getOfflineUser(cmd[3]);
-		if (essUser == null) {
-			player.sendMessage(ChatColor.RED + "Игрока " + cmd[3] + " ещё небыло на сервере!");
+		// Заглушка для слишком большого кол-ва аргументов
+		if(cmd.length > 6) {
+			player.sendMessage(ChatColor.RED + "В введенной вами команде слишком много аргументов.");
 			event.setCancelled(true);
 			return;
 		}
-		UUID uuid = essUser.getConfigUUID();
-		if (Bukkit.getPlayer(uuid) != null)
+		// Отдельно запишем регион, ник и мир
+		String region=null, name=null;
+		World world=null;
+		// Пропарсим команду начиная с третьего аргумента
+		for(int i=2;i<cmd.length;i++) {
+			if(cmd[i].equals("-a"))
+				return;
+			if(cmd[i].equals("-w")) {
+				if(world!=null) {
+					player.sendMessage(ChatColor.RED + "Вы уже указали мир.");
+					event.setCancelled(true);
+					return;
+				}
+				if(cmd.length<i+2) {
+					player.sendMessage(ChatColor.RED + "Вы не указали мир, в котором хотите редактировать регион.");
+					event.setCancelled(true);
+					return;
+				}
+				world=Bukkit.getWorld(cmd[i+1]);
+				if(world==null) {
+					player.sendMessage(ChatColor.RED + "Вы не указали несуществующий мир.");
+					event.setCancelled(true);
+					return;
+				}
+				continue;
+			}
+			if(region == null)
+				region=cmd[i];
+			else
+				name=cmd[i];
+		}
+		// Если -w не указан - берем мир от игрока
+		if(world==null)
+			world=player.getWorld();
+		// Ищем игрока среди онлайна и оффлайна
+		UUID uuid = getUniqueId(name);
+		if(uuid==null) {
+			player.sendMessage(ChatColor.RED + "Игрока " + name + " ещё небыло на сервере.");
+			event.setCancelled(true);
 			return;
-		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).getRegion(cmd[2]);
+		}
+		if(uuid.equals(ZERO_UUID))
+			return;
+		// Проверяем наличие региона
+		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world)).getRegion(region);
 		if (rg == null) {
-			player.sendMessage(ChatColor.RED + "Неизвестный регион " + cmd[2] + ".");
+			player.sendMessage(ChatColor.RED + "Неизвестный регион " + region + ".");
 			event.setCancelled(true);
 			return;
 		}
-		if (!canAffect(rg, cmd[1], player)) {
+		// Проверяем, может ли игрок творить свои дела
+		if (!canAffect(rg, action, player)) {
 			player.sendMessage(ChatColor.RED + "У вас недостаточно прав, чтобы сделать это.");
 			event.setCancelled(true);
 			return;
 		}
-		switch (cmd[1]) {
+		// Выполняем требуемое действие
+		switch (action) {
 			case "removeowner": {
 				rg.getOwners().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + cmd[3] + " удалён из владельцев " + cmd[2] + ".");
+				player.sendMessage(ChatColor.GREEN + name + " удалён из владельцев " + region + ".");
 				break;
 			}
 			case "removemember": {
 				rg.getMembers().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + cmd[3] + " удалён из участников " + cmd[2] + ".");
+				player.sendMessage(ChatColor.GREEN + name + " удалён из участников " + region + ".");
 				break;
 			}
 			case "addowner": {
 				rg.getOwners().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + cmd[3] + " добавлен во владельцы " + cmd[2] + ".");
+				player.sendMessage(ChatColor.GREEN + name + " добавлен во владельцы " + region + ".");
 				break;
 			}
 			case "addmember": {
 				rg.getMembers().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + cmd[3] + " добавлен в участники " + cmd[2] + ".");
+				player.sendMessage(ChatColor.GREEN + name + " добавлен в участники " + region + ".");
 				break;
 			}
 		}
-		if(!saveChanges(player.getWorld()))
+		// Сохраняем изменения
+		if(!saveChanges(world))
 			player.sendMessage(ChatColor.RED+"При попытке сохранения была найдена ошибка! Попробуйте позже.");
 		event.setCancelled(true);
 	}
+
+	// Вообще, это можно сделать и без Essentials. Здесь скорей вопрос оптимизации
+	/**
+	 * @return ZERO_UUID если игрок онлайн, нормальный UUID если игрок оффлайн, null если не найден
+	 */
+	private UUID getUniqueId(String name) {
+		for(Player player : Bukkit.getServer().getOnlinePlayers())
+			if(name.equalsIgnoreCase(player.getName()))
+				return ZERO_UUID;
+		User essUser = ess.getOfflineUser(name);
+		return essUser==null ? null : essUser.getConfigUUID();
+	}
+
 	private String getAction(String arg) {
 		switch (arg) {
 			case "removeowner": case "ro": return "removeowner";
@@ -108,6 +160,7 @@ public class Main extends JavaPlugin implements Listener {
 			default: return null;
 		}
 	}
+
 	private boolean saveChanges(World world) {
 		try {
 			wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world)).saveChanges();
@@ -117,11 +170,12 @@ public class Main extends JavaPlugin implements Listener {
 			return false;
 		}
 	}
+
 	private boolean canAffect(ProtectedRegion region, String action, Player player) {
-		return (region.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".own.*"))
+		return (region.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".own."+region.getId()))
 				||
-				player.hasPermission("worldguard.region."+action+".*")
+				player.hasPermission("worldguard.region."+action+"."+region.getId())
 				||
-				(region.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".member.*"));
+				(region.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".member."+region.getId()));
 	}
 }
