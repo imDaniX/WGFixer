@@ -19,7 +19,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
-	private final UUID ZERO_UUID=UUID.fromString("00000000-0000-0000-0000-000000000000");
+	private final UUID ZERO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 	private WorldGuard wg;
 	private Essentials ess;
 	@Override
@@ -36,17 +36,17 @@ public class Main extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
-		Player player=event.getPlayer();
+		Player player = event.getPlayer();
 		String[] cmd = event.getMessage().toLowerCase().split(" ");
 		// Является ли введенная команда командой WG
 		if (
 				cmd.length < 4
-				|| 
+				||
 				!((cmd[0].equals("/rg") || cmd[0].equals("/region") || cmd[0].equals("/regions") || cmd[0].equals("/worldguard:rg") || cmd[0].equals("/worldguard:region") || cmd[0].equals("/worldguard:regions")))
 			) return;
 		// Редактируются ли участники или владельцы региона
-		String action=getAction(cmd[1]);
-		if(action==null)
+		String action = getAction(cmd[1]);
+		if(action == null)
 			return;
 		// Заглушка для слишком большого кол-ва аргументов
 		if(cmd.length > 6) {
@@ -55,25 +55,25 @@ public class Main extends JavaPlugin implements Listener {
 			return;
 		}
 		// Отдельно запишем регион, ник и мир
-		String region=null, name=null;
-		World world=null;
+		String region = null, name = null;
+		World world = null;
 		// Пропарсим команду начиная с третьего аргумента
-		for(int i=2;i<cmd.length;i++) {
+		for(int i = 2; i < cmd.length; i++) {
 			if(cmd[i].equals("-a"))
 				return;
 			if(cmd[i].equals("-w")) {
-				if(world!=null) {
+				if(world != null) {
 					player.sendMessage(ChatColor.RED + "Вы уже указали мир.");
 					event.setCancelled(true);
 					return;
 				}
-				if(cmd.length<i+2) {
+				if(cmd.length < i+2) {
 					player.sendMessage(ChatColor.RED + "Вы не указали мир, в котором хотите редактировать регион.");
 					event.setCancelled(true);
 					return;
 				}
-				world=Bukkit.getWorld(cmd[i+1]);
-				if(world==null) {
+				world = Bukkit.getWorld(cmd[i+1]);
+				if(world == null) {
 					player.sendMessage(ChatColor.RED + "Вы указали несуществующий мир.");
 					event.setCancelled(true);
 					return;
@@ -81,16 +81,16 @@ public class Main extends JavaPlugin implements Listener {
 				continue;
 			}
 			if(region == null)
-				region=cmd[i];
+				region = cmd[i];
 			else
-				name=cmd[i];
+				name = cmd[i];
 		}
 		// Если -w не указан - берем мир от игрока
-		if(world==null)
+		if(world == null)
 			world=player.getWorld();
 		// Ищем игрока среди онлайна и оффлайна
 		UUID uuid = getUniqueId(name);
-		if(uuid==null) {
+		if(uuid == null) {
 			player.sendMessage(ChatColor.RED + "Игрока " + name + " ещё небыло на сервере.");
 			event.setCancelled(true);
 			return;
@@ -148,7 +148,7 @@ public class Main extends JavaPlugin implements Listener {
 			if(name.equalsIgnoreCase(player.getName()))
 				return ZERO_UUID;
 		User essUser = ess.getOfflineUser(name);
-		return essUser==null ? null : essUser.getConfigUUID();
+		return essUser == null ? null : essUser.getConfigUUID();
 	}
 
 	private String getAction(String arg) {
@@ -173,10 +173,10 @@ public class Main extends JavaPlugin implements Listener {
 
 	private boolean canAffect(ProtectedRegion region, String action, Player player) {
 		String id = region.getId().toLowerCase();
-		return (region.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".own."+id))
+		return (region.getOwners().contains(player.getUniqueId()) && player.hasPermission("worldguard.region." + action + ".own." + id))
 				||
-				player.hasPermission("worldguard.region."+action+"."+id)
+				player.hasPermission("worldguard.region." + action + "." + id)
 				||
-				(region.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region."+action+".member."+id));
+				(region.getMembers().contains(player.getUniqueId()) && player.hasPermission("worldguard.region." + action + ".member." + id));
 	}
 }
