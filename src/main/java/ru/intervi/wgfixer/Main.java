@@ -67,12 +67,14 @@ public class Main extends JavaPlugin implements Listener {
 					event.setCancelled(true);
 					return;
 				}
-				if(cmd.length < i+2) {
+				// Определяем мир, так что двигаем на один пункт дальше
+				i++;
+				if(cmd.length < i+1) {
 					player.sendMessage(ChatColor.RED + "Вы не указали мир, в котором хотите редактировать регион.");
 					event.setCancelled(true);
 					return;
 				}
-				world = Bukkit.getWorld(cmd[i+1]);
+				world = Bukkit.getWorld(cmd[i]);
 				if(world == null) {
 					player.sendMessage(ChatColor.RED + "Вы указали несуществующий мир.");
 					event.setCancelled(true);
@@ -84,6 +86,18 @@ public class Main extends JavaPlugin implements Listener {
 				region = cmd[i];
 			else
 				name = cmd[i];
+		}
+		// Проверяем наличие региона
+		if(region == null) {
+			player.sendMessage(ChatColor.RED + "Вы не указали название региона.");
+			event.setCancelled(true);
+			return;
+		}
+		// Проверяем наличие ника - он обязательно должен быть, если -a уже
+		if(name == null) {
+			player.sendMessage(ChatColor.RED + "Вы не указали ник игрока.");
+			event.setCancelled(true);
+			return;
 		}
 		// Если -w не указан - берем мир от игрока
 		if(world == null)
