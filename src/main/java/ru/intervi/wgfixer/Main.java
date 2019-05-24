@@ -87,7 +87,7 @@ public class Main extends JavaPlugin implements Listener {
 			else
 				name = cmd[i];
 		}
-		// Проверяем наличие региона
+		// Проверяем наличие названия региона
 		if(region == null) {
 			player.sendMessage(ChatColor.RED + "Вы не указали название региона.");
 			event.setCancelled(true);
