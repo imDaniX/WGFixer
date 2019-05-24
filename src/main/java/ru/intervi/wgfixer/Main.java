@@ -93,7 +93,7 @@ public class Main extends JavaPlugin implements Listener {
 			event.setCancelled(true);
 			return;
 		}
-		// Проверяем наличие ника - он обязательно должен быть, если -a уже
+		// Проверяем наличие ника - он обязательно должен быть, т.к. -a нет
 		if(name == null) {
 			player.sendMessage(ChatColor.RED + "Вы не указали ник игрока.");
 			event.setCancelled(true);
@@ -105,7 +105,7 @@ public class Main extends JavaPlugin implements Listener {
 		// Ищем игрока среди онлайна и оффлайна
 		UUID uuid = getUniqueId(name);
 		if(uuid == null) {
-			player.sendMessage(ChatColor.RED + "Игрока " + name + " ещё небыло на сервере.");
+			player.sendMessage(ChatColor.RED + "Игрока " + name + " ещё не было на сервере.");
 			event.setCancelled(true);
 			return;
 		}
