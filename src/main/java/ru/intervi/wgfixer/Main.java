@@ -104,7 +104,7 @@ public class Main extends JavaPlugin implements Listener {
 			case "removeowner": case "ro": return "removeowner";
 			case "removemember": case "rm": case "remmember": case "removemem": case "remmem": return "removemember";
 			case "addowner": case "ao": return "addowner";
-			case "addmember": case "am": case "addmem": return "addmemver";
+			case "addmember": case "am": case "addmem": return "addmember";
 			default: return null;
 		}
 	}
