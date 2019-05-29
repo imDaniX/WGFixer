@@ -44,7 +44,7 @@ public class Main extends JavaPlugin implements Listener {
 				||
 				!((cmd[0].equals("/rg") || cmd[0].equals("/region") || cmd[0].equals("/regions") || cmd[0].equals("/worldguard:rg") || cmd[0].equals("/worldguard:region") || cmd[0].equals("/worldguard:regions")))
 			) return;
-		// Редактируются ли участники или владельцы региона
+		// Редактируются ли сейчас участники или владельцы региона
 		String action = getAction(cmd[1]);
 		if(action == null)
 			return;
@@ -54,7 +54,7 @@ public class Main extends JavaPlugin implements Listener {
 			event.setCancelled(true);
 			return;
 		}
-		// Отдельно запишем регион, ник и мир
+		// Отдельно запишем название региона, ник и мир
 		String region = null, name = null;
 		World world = null;
 		// Пропарсим команду начиная с третьего аргумента
@@ -87,16 +87,16 @@ public class Main extends JavaPlugin implements Listener {
 			else
 				name = cmd[i];
 		}
-		// Проверяем наличие названия региона
+		// Отменяем ивент, т.к. передавать команду в управление WG больше не требуется
+		event.setCancelled(true);
+		// Проверяем наличие названи региона
 		if(region == null) {
 			player.sendMessage(ChatColor.RED + "Вы не указали название региона.");
-			event.setCancelled(true);
 			return;
 		}
 		// Проверяем наличие ника - он обязательно должен быть, т.к. -a нет
 		if(name == null) {
 			player.sendMessage(ChatColor.RED + "Вы не указали ник игрока.");
-			event.setCancelled(true);
 			return;
 		}
 		// Если -w не указан - берем мир от игрока
@@ -106,7 +106,6 @@ public class Main extends JavaPlugin implements Listener {
 		UUID uuid = getUniqueId(name);
 		if(uuid == null) {
 			player.sendMessage(ChatColor.RED + "Игрока " + name + " ещё не было на сервере.");
-			event.setCancelled(true);
 			return;
 		}
 		if(uuid.equals(ZERO_UUID))
@@ -115,13 +114,11 @@ public class Main extends JavaPlugin implements Listener {
 		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world)).getRegion(region);
 		if (rg == null) {
 			player.sendMessage(ChatColor.RED + "Неизвестный регион " + region + ".");
-			event.setCancelled(true);
 			return;
 		}
 		// Проверяем, может ли игрок творить свои дела
 		if (!canAffect(rg, action, player)) {
 			player.sendMessage(ChatColor.RED + "У вас недостаточно прав, чтобы сделать это.");
-			event.setCancelled(true);
 			return;
 		}
 		// Выполняем требуемое действие
@@ -150,7 +147,6 @@ public class Main extends JavaPlugin implements Listener {
 		// Сохраняем изменения
 		if(!saveChanges(world))
 			player.sendMessage(ChatColor.RED+"При попытке сохранения была найдена ошибка! Попробуйте позже.");
-		event.setCancelled(true);
 	}
 
 	// Вообще, это можно сделать и без Essentials. Здесь скорей вопрос оптимизации
