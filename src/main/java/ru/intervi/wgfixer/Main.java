@@ -89,7 +89,7 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		// Отменяем ивент, т.к. передавать команду в управление WG больше не требуется
 		event.setCancelled(true);
-		// Проверяем наличие названи региона
+		// Проверяем наличие названия региона
 		if(region == null) {
 			player.sendMessage(ChatColor.RED + "Вы не указали название региона.");
 			return;
