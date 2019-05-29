@@ -59,7 +59,7 @@ public class Main extends JavaPlugin implements Listener {
 		World world = null;
 		// Пропарсим команду начиная с третьего аргумента
 		for(int i = 2; i < cmd.length; i++) {
-			if(cmd[i].equals("-a"))
+			if(cmd[i].equals("-a") || cmd[i].equals("-n"))
 				return;
 			if(cmd[i].equals("-w")) {
 				if(world != null) {
