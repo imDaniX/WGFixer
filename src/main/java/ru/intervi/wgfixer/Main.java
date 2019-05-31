@@ -1,27 +1,26 @@
 package ru.intervi.wgfixer;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.entity.Player;
-
+import org.bukkit.plugin.java.JavaPlugin;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
 import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
 	private final UUID ZERO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 	private WorldGuard wg;
 	private Essentials ess;
+
 	@Override
 	public void onEnable() {
 		if (!Bukkit.getOnlineMode()) {
@@ -87,21 +86,23 @@ public class Main extends JavaPlugin implements Listener {
 			else
 				name = cmd[i];
 		}
-		// Отменяем ивент, т.к. передавать команду в управление WG больше не требуется
-		event.setCancelled(true);
 		// Проверяем наличие названия региона
 		if(region == null) {
 			player.sendMessage(ChatColor.RED + "Вы не указали название региона.");
+			event.setCancelled(true);
 			return;
 		}
 		// Проверяем наличие ника - он обязательно должен быть, т.к. -a нет
 		if(name == null) {
 			player.sendMessage(ChatColor.RED + "Вы не указали ник игрока.");
+			event.setCancelled(true);
 			return;
 		}
 		// Если -w не указан - берем мир от игрока
 		if(world == null)
 			world=player.getWorld();
+		// Отменяем ивент, т.к. передавать команду в управление WG больше не требуется
+		event.setCancelled(true);
 		// Ищем игрока среди онлайна и оффлайна
 		UUID uuid = getUniqueId(name);
 		if(uuid == null) {
