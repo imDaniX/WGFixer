@@ -7,6 +7,8 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -54,9 +56,9 @@ public class Main extends JavaPlugin implements Listener {
 		// Если use_names true, то просто добавляем -n
 		if(cfg.useNames()) {
 			StringBuilder builder=new StringBuilder(cmd[0]);
-			builder.append(" "+cmd[1]).append(" -n");
+			builder.append(" ").append(cmd[1]).append(" -n");
 			for(int i = 2; i < cmd.length; i++)
-				builder.append(cmd[i]);
+				builder.append(" ").append(cmd[i]);
 			event.setMessage(builder.toString());
 			return;
 		}
@@ -164,6 +166,14 @@ public class Main extends JavaPlugin implements Listener {
 			player.sendMessage(cfg.getMessage(Message.SAVE_FAIL));
 	}
 
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if(sender.hasPermission("wgfix.command")) {
+			cfg.reloadConfig();
+			sender.sendMessage(cfg.getMessage(Message.RELOAD_SUCCESS));
+		} else sender.sendMessage(cfg.getMessage(Message.NO_PERMISSION));
+		return true;
+	}
 
 	// Вообще, это можно сделать и без Essentials. Здесь скорей вопрос оптимизации
 	/**

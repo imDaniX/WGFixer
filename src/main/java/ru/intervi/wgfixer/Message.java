@@ -1,7 +1,8 @@
 package ru.intervi.wgfixer;
 
 public enum Message {
-	TOO_MANY_ARGS("too_many_args"), NO_PERMISSION("no_permission_command"), SAVE_FAIL("save_fail"),
+	TOO_MANY_ARGS("too_many_args"), SAVE_FAIL("save_fail"),
+	NO_PERMISSION("no_permission_command"), RELOAD_SUCCESS("reload_success"),
 
 	WORLD_ALREADY_CHOSEN("world.already_chosen", "world"),
 	WORLD_NO_ARG("world.no_arg"),
