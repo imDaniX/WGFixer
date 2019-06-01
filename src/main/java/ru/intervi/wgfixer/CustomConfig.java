@@ -34,6 +34,14 @@ public class CustomConfig {
 		}
 	}
 
+	private void loadData() {
+		messages=new HashMap<>();
+		for(Message msg:Message.values())
+			messages.put(msg, clr(yml.getString(msg.getLocation(), ChatColor.DARK_RED+"Error")));
+		names=yml.getBoolean("settings.use_names");
+		online=yml.getBoolean("settings.ignore_online");
+	}
+
 	public String getMessage(Message msg) {
 		return messages.get(msg);
 	}
@@ -46,13 +54,6 @@ public class CustomConfig {
 		return message;
 	}
 
-	private void loadData() {
-		messages=new HashMap<>();
-		for(Message msg:Message.values())
-			messages.put(msg, clr(yml.getString(msg.getLocation(), ChatColor.DARK_RED+"Error")));
-		names=yml.getBoolean("settings.use_names");
-		online=yml.getBoolean("settings.ignore_online");
-	}
 
 	public boolean useNames() {
 		return names;
@@ -62,7 +63,7 @@ public class CustomConfig {
 		return online;
 	}
 
-	protected String clr(String s) {
+	private String clr(String s) {
 		return ChatColor.translateAlternateColorCodes('&', s);
 	}
 }
