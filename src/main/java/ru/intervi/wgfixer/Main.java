@@ -101,16 +101,17 @@ public class Main extends JavaPlugin implements Listener {
 		// Если -w не указан - берем мир от игрока
 		if(world == null)
 			world=player.getWorld();
-		// Отменяем ивент, т.к. передавать команду в управление WG больше не требуется
-		event.setCancelled(true);
 		// Ищем игрока среди онлайна и оффлайна
 		UUID uuid = getUniqueId(name);
 		if(uuid == null) {
 			player.sendMessage(ChatColor.RED + "Игрока " + name + " ещё не было на сервере.");
+			event.setCancelled(true);
 			return;
 		}
 		if(uuid.equals(ZERO_UUID))
 			return;
+		// Отменяем ивент, т.к. передавать команду в управление WG больше не требуется
+		event.setCancelled(true);
 		// Проверяем наличие региона
 		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world)).getRegion(region);
 		if (rg == null) {
