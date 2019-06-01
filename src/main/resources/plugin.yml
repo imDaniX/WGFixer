@@ -3,4 +3,5 @@ main: ru.intervi.wgfixer.Main
 version: ${project.version}
 description: ${project.description}
 author: InterVi
-depend: [WorldGuard, Essentials]
+depend: [WorldGuard]
+softdepend: [Essentials]

@@ -4,6 +4,7 @@ settings:
   # ignore_online - должен ли плагин игнорировать онлайн игроков(управление передастся WG)
   # Не работает с use_names: true
   ignore_online: true
+  # essentials - использовать ли алгоритм поиска uuid через essentials
 messages:
   too_many_args: "&cВ веденной вами команде слишком много аргументов."
   world:

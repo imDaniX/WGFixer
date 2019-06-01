@@ -14,7 +14,7 @@ public class CustomConfig {
 	private File file;
 
 	private Map<Message, String> messages;
-	private boolean names, online;
+	private boolean names, online, essentials;
 	
 	public CustomConfig(JavaPlugin plg, String name) {
 		file = new File(plg.getDataFolder(), name + ".yml");
@@ -40,6 +40,7 @@ public class CustomConfig {
 			messages.put(msg, clr(yml.getString(msg.getLocation(), ChatColor.DARK_RED+"Error")));
 		names=yml.getBoolean("settings.use_names");
 		online=yml.getBoolean("settings.ignore_online");
+		essentials=yml.getBoolean("settings.essentials");
 	}
 
 	public String getMessage(Message msg) {
@@ -61,6 +62,10 @@ public class CustomConfig {
 
 	public boolean ignoreOnline() {
 		return online;
+	}
+
+	public boolean essMode() {
+		return essentials;
 	}
 
 	private String clr(String s) {

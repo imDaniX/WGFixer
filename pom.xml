@@ -6,7 +6,7 @@
 
     <groupId>ru.intervi</groupId>
     <artifactId>wgfixer</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
     <packaging>jar</packaging>
 
     <name>WGFixer</name>

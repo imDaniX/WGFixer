@@ -6,6 +6,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.UUID;
@@ -23,19 +25,26 @@ public class Main extends JavaPlugin implements Listener {
 	private WorldGuard wg;
 	private Essentials ess;
 
+	private boolean essMode=false;
+
 	private CustomConfig cfg;
 
 	@Override
 	public void onEnable() {
+		PluginManager manager = Bukkit.getPluginManager();
 		if (!Bukkit.getOnlineMode()) {
-			getServer().getPluginManager().registerEvents(this, this);
-			ess = (Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
-			wg = WorldGuard.getInstance();
+			manager.registerEvents(this, this);
 			cfg = new CustomConfig(this, "config");
+			if(manager.isPluginEnabled("Essentials")) {
+				ess = (Essentials) manager.getPlugin("Essentials");
+				essMode = true;
+			}
+			essMode=essMode&&cfg.essMode();
+			wg = WorldGuard.getInstance();
 			return;
 		}
 		getLogger().info("This server uses online-mode=true. Plugin will be disabled.");
-		Bukkit.getPluginManager().disablePlugin(this);
+		manager.disablePlugin(this);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -171,12 +180,12 @@ public class Main extends JavaPlugin implements Listener {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(sender.hasPermission("wgfix.command")) {
 			cfg.reloadConfig();
+			essMode = cfg.essMode() && Bukkit.getPluginManager().isPluginEnabled("Essentials");
 			sender.sendMessage(cfg.getMessage(Message.RELOAD_SUCCESS));
 		} else sender.sendMessage(cfg.getMessage(Message.NO_PERMISSION));
 		return true;
 	}
 
-	// Вообще, это можно сделать и без Essentials. Здесь скорей вопрос оптимизации
 	/**
 	 * @return ZERO_UUID если игрок онлайн и ignoreOnline true, нормальный UUID если игрок оффлайн, null если не найден
 	 */
@@ -184,8 +193,15 @@ public class Main extends JavaPlugin implements Listener {
 		for(Player player : Bukkit.getServer().getOnlinePlayers())
 			if(name.equalsIgnoreCase(player.getName()))
 				return cfg.ignoreOnline()?ZERO_UUID:player.getUniqueId();
-		User essUser = ess.getOfflineUser(name);
-		return essUser == null ? null : essUser.getConfigUUID();
+		if(essMode) {
+			User essUser = ess.getOfflineUser(name);
+			return essUser == null ? null : essUser.getConfigUUID();
+		} else {
+			for(OfflinePlayer offPlayer : Bukkit.getOfflinePlayers())
+				if(name.equalsIgnoreCase(offPlayer.getName()))
+					return offPlayer.getUniqueId();
+			return null;
+		}
 	}
 
 	private String getAction(String arg) {
