@@ -1,0 +1,26 @@
+settings:
+  # use_names - вместо поиска UUID плагин просто добавит маркер -n(управление передастся WG)
+  use_names: false
+  # ignore_online - должен ли плагин игнорировать онлайн игроков(управление передастся WG)
+  # Не работает с use_names: true
+  ignore_online: true
+messages:
+  too_many_args: "&cВ веденной вами команде слишком много аргументов."
+  world:
+    already_chosen: "&cВы уже указали мир &e{world}&c."
+    no_arg: "&cВы не указали мир, в котором хотите редактировать регион."
+    unknown: "&cВы указали несуществующий мир."
+  name:
+    no_arg: "&cВы не указали ник игрока."
+    unknown: "&cИгрока &e{player}&c ещё не было на сервере."
+  region:
+    no_arg: "&cВы не указали название региона."
+    unknown: "&cНеизвестный регион &e{region}&c."
+    no_permission: "&cУ вас недостаточно прав, чтобы редактировать этот регион."
+  no_permission_command: "&cУ вас недостаточно прав, чтобы перезагрузить плагин."
+  action:
+    removeowner: "&aИгрок &e{player}&a удален из владельцев региона &e{region}&a."
+    removemember: "&aИгрок &e{player}&a удален из участников региона &e{region}&a."
+    addowner: "&aИгрок &e{player}&a добавлен во владельцев региона &e{region}&a."
+    addmember: "&aИгрок &e{player}&a добавлен в участники региона &e{region}&a."
+  save_fail: "&cПри попытке сохранения была найдена ошибка! Попробуйте позже."

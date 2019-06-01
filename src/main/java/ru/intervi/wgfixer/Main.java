@@ -1,7 +1,11 @@
 package ru.intervi.wgfixer;
 
+import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.User;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,11 +13,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import com.earth2me.essentials.Essentials;
-import com.earth2me.essentials.User;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
 import java.util.UUID;
 
 public class Main extends JavaPlugin implements Listener {
@@ -21,12 +21,15 @@ public class Main extends JavaPlugin implements Listener {
 	private WorldGuard wg;
 	private Essentials ess;
 
+	private CustomConfig cfg;
+
 	@Override
 	public void onEnable() {
 		if (!Bukkit.getOnlineMode()) {
 			getServer().getPluginManager().registerEvents(this, this);
 			ess = (Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
 			wg = WorldGuard.getInstance();
+			cfg = new CustomConfig(this, "config");
 			return;
 		}
 		getLogger().info("This server uses online-mode=true. Plugin will be disabled.");
@@ -47,9 +50,20 @@ public class Main extends JavaPlugin implements Listener {
 		String action = getAction(cmd[1]);
 		if(action == null)
 			return;
+
+		// Если use_names true, то просто добавляем -n
+		if(cfg.useNames()) {
+			StringBuilder builder=new StringBuilder(cmd[0]);
+			builder.append(" "+cmd[1]).append(" -n");
+			for(int i = 2; i < cmd.length; i++)
+				builder.append(cmd[i]);
+			event.setMessage(builder.toString());
+			return;
+		}
+
 		// Заглушка для слишком большого кол-ва аргументов
 		if(cmd.length > 6) {
-			player.sendMessage(ChatColor.RED + "В введенной вами команде слишком много аргументов.");
+			player.sendMessage(cfg.getMessage(Message.TOO_MANY_ARGS));
 			event.setCancelled(true);
 			return;
 		}
@@ -62,20 +76,20 @@ public class Main extends JavaPlugin implements Listener {
 				return;
 			if(cmd[i].equals("-w")) {
 				if(world != null) {
-					player.sendMessage(ChatColor.RED + "Вы уже указали мир.");
+					player.sendMessage(cfg.getMessage(Message.WORLD_ALREADY_CHOSEN, world.getName()));
 					event.setCancelled(true);
 					return;
 				}
 				// Определяем мир, так что двигаем на один пункт дальше
 				i++;
 				if(cmd.length < i+1) {
-					player.sendMessage(ChatColor.RED + "Вы не указали мир, в котором хотите редактировать регион.");
+					player.sendMessage(cfg.getMessage(Message.WORLD_NO_ARG));
 					event.setCancelled(true);
 					return;
 				}
 				world = Bukkit.getWorld(cmd[i]);
 				if(world == null) {
-					player.sendMessage(ChatColor.RED + "Вы указали несуществующий мир.");
+					player.sendMessage(cfg.getMessage(Message.WORLD_UNKNOWN, world.getName()));
 					event.setCancelled(true);
 					return;
 				}
@@ -88,13 +102,13 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		// Проверяем наличие названия региона
 		if(region == null) {
-			player.sendMessage(ChatColor.RED + "Вы не указали название региона.");
+			player.sendMessage(cfg.getMessage(Message.REGION_NO_ARG));
 			event.setCancelled(true);
 			return;
 		}
 		// Проверяем наличие ника - он обязательно должен быть, т.к. -a нет
 		if(name == null) {
-			player.sendMessage(ChatColor.RED + "Вы не указали ник игрока.");
+			player.sendMessage(cfg.getMessage(Message.NAME_NO_ARG));
 			event.setCancelled(true);
 			return;
 		}
@@ -106,58 +120,59 @@ public class Main extends JavaPlugin implements Listener {
 		// Ищем игрока среди онлайна и оффлайна
 		UUID uuid = getUniqueId(name);
 		if(uuid == null) {
-			player.sendMessage(ChatColor.RED + "Игрока " + name + " ещё не было на сервере.");
+			player.sendMessage(cfg.getMessage(Message.NAME_UNKNOWN, name));
 			return;
 		}
 		if(uuid.equals(ZERO_UUID))
 			return;
 		// Проверяем наличие региона
-		ProtectedRegion rg = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world)).getRegion(region);
-		if (rg == null) {
-			player.sendMessage(ChatColor.RED + "Неизвестный регион " + region + ".");
+		ProtectedRegion wgRegion = wg.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world)).getRegion(region);
+		if (wgRegion == null) {
+			player.sendMessage(cfg.getMessage(Message.REGION_UNKNOWN, region));
 			return;
 		}
 		// Проверяем, может ли игрок творить свои дела
-		if (!canAffect(rg, action, player)) {
-			player.sendMessage(ChatColor.RED + "У вас недостаточно прав, чтобы сделать это.");
+		if (!canAffect(wgRegion, action, player)) {
+			player.sendMessage(cfg.getMessage(Message.REGION_NO_PERMISSION));
 			return;
 		}
 		// Выполняем требуемое действие
 		switch (action) {
 			case "removeowner": {
-				rg.getOwners().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + name + " удалён из владельцев " + region + ".");
+				wgRegion.getOwners().removePlayer(uuid);
+				player.sendMessage(cfg.getMessage(Message.ACTION_REMOVEOWNER, name, region));
 				break;
 			}
 			case "removemember": {
-				rg.getMembers().removePlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + name + " удалён из участников " + region + ".");
+				wgRegion.getMembers().removePlayer(uuid);
+				player.sendMessage(cfg.getMessage(Message.ACTION_REMOVEMEMBER, name, region));
 				break;
 			}
 			case "addowner": {
-				rg.getOwners().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + name + " добавлен во владельцы " + region + ".");
+				wgRegion.getOwners().addPlayer(uuid);
+				player.sendMessage(cfg.getMessage(Message.ACTION_ADDOWNER, name, region));
 				break;
 			}
 			case "addmember": {
-				rg.getMembers().addPlayer(uuid);
-				player.sendMessage(ChatColor.GREEN + name + " добавлен в участники " + region + ".");
+				wgRegion.getMembers().addPlayer(uuid);
+				player.sendMessage(cfg.getMessage(Message.ACTION_ADDMEMBER, name, region));
 				break;
 			}
 		}
 		// Сохраняем изменения
 		if(!saveChanges(world))
-			player.sendMessage(ChatColor.RED+"При попытке сохранения была найдена ошибка! Попробуйте позже.");
+			player.sendMessage(cfg.getMessage(Message.SAVE_FAIL));
 	}
+
 
 	// Вообще, это можно сделать и без Essentials. Здесь скорей вопрос оптимизации
 	/**
-	 * @return ZERO_UUID если игрок онлайн, нормальный UUID если игрок оффлайн, null если не найден
+	 * @return ZERO_UUID если игрок онлайн и ignoreOnline true, нормальный UUID если игрок оффлайн, null если не найден
 	 */
 	private UUID getUniqueId(String name) {
 		for(Player player : Bukkit.getServer().getOnlinePlayers())
 			if(name.equalsIgnoreCase(player.getName()))
-				return ZERO_UUID;
+				return cfg.ignoreOnline()?ZERO_UUID:player.getUniqueId();
 		User essUser = ess.getOfflineUser(name);
 		return essUser == null ? null : essUser.getConfigUUID();
 	}
