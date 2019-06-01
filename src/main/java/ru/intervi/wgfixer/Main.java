@@ -91,7 +91,7 @@ public class Main extends JavaPlugin implements Listener {
 				}
 				world = Bukkit.getWorld(cmd[i]);
 				if(world == null) {
-					player.sendMessage(cfg.getMessage(Message.WORLD_UNKNOWN, world.getName()));
+					player.sendMessage(cfg.getMessage(Message.WORLD_UNKNOWN, cmd[i]));
 					event.setCancelled(true);
 					return;
 				}
