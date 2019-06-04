@@ -30,11 +30,14 @@ public enum Message {
 
 	Message(String location, String... placeholders) {
 		this.location = location;
-		this.placeholders = placeholders;
+		this.placeholders = new String[placeholders.length];
+		int i=0;
+		for(String placeholder : placeholders)
+			this.placeholders[i++] = "{" + placeholder + "}";
 	}
 
 	public String getLocation() {
-		return "world." + location;
+		return "messages." + location;
 	}
 
 	public String[] getPlaceholders() {

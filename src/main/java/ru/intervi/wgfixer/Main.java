@@ -6,6 +6,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -64,8 +65,7 @@ public class Main extends JavaPlugin implements Listener {
 
 		// Если use_names true, то просто добавляем -n
 		if(cfg.useNames()) {
-			StringBuilder builder=new StringBuilder(cmd[0]);
-			builder.append(" ").append(cmd[1]).append(" -n");
+			StringBuilder builder = new StringBuilder(cmd[0]).append(" ").append(cmd[1]).append(" -n");
 			for(int i = 2; i < cmd.length; i++)
 				builder.append(" ").append(cmd[i]);
 			event.setMessage(builder.toString());
@@ -179,9 +179,10 @@ public class Main extends JavaPlugin implements Listener {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(sender.hasPermission("wgfix.command")) {
-			cfg.reloadConfig();
-			essMode = cfg.essMode() && Bukkit.getPluginManager().isPluginEnabled("Essentials");
-			sender.sendMessage(cfg.getMessage(Message.RELOAD_SUCCESS));
+			if(cfg.reloadConfig()) {
+				essMode = cfg.essMode() && Bukkit.getPluginManager().isPluginEnabled("Essentials");
+				sender.sendMessage(cfg.getMessage(Message.RELOAD_SUCCESS));
+			} else sender.sendMessage(ChatColor.DARK_RED + "Error");
 		} else sender.sendMessage(cfg.getMessage(Message.NO_PERMISSION));
 		return true;
 	}

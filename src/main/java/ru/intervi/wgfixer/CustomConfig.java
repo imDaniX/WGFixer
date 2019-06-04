@@ -25,19 +25,21 @@ public class CustomConfig {
 		loadData();
 	}
 	
-	public void reloadConfig() {
+	public boolean reloadConfig() {
 		try {
 			yml = YamlConfiguration.loadConfiguration(file);
 			loadData();
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 
 	private void loadData() {
 		messages=new HashMap<>();
 		for(Message msg:Message.values())
-			messages.put(msg, clr(yml.getString(msg.getLocation(), ChatColor.DARK_RED+"Error")));
+			messages.put(msg, clr(yml.getString(msg.getLocation(), ChatColor.DARK_RED + "Error")));
 		names=yml.getBoolean("settings.use_names");
 		online=yml.getBoolean("settings.ignore_online");
 		essentials=yml.getBoolean("settings.essentials");
@@ -51,7 +53,7 @@ public class CustomConfig {
 		int i = 0;
 		String message = messages.get(msg);
 		for(String ph:msg.getPlaceholders())
-			message.replace("{" + ph + "}", phs[i++]);
+			message = message.replace(ph, phs[i++]);
 		return message;
 	}
 
