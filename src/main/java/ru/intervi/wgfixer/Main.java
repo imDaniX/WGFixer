@@ -48,7 +48,7 @@ public class Main extends JavaPlugin implements Listener {
 		manager.disablePlugin(this);
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
 		if(event.isCancelled() && cfg.respectCancelled())
 			return;
