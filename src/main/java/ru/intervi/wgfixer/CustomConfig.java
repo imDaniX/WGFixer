@@ -14,7 +14,7 @@ public class CustomConfig {
 	private File file;
 
 	private Map<Message, String> messages;
-	private boolean names, online, essentials;
+	private boolean names, online, essentials, respect;
 	
 	public CustomConfig(JavaPlugin plg, String name) {
 		file = new File(plg.getDataFolder(), name + ".yml");
@@ -37,12 +37,13 @@ public class CustomConfig {
 	}
 
 	private void loadData() {
-		messages=new HashMap<>();
+		messages = new HashMap<>();
 		for(Message msg:Message.values())
 			messages.put(msg, clr(yml.getString(msg.getLocation(), ChatColor.DARK_RED + "Error")));
-		names=yml.getBoolean("settings.use_names");
-		online=yml.getBoolean("settings.ignore_online");
-		essentials=yml.getBoolean("settings.essentials");
+		names = yml.getBoolean("settings.use_names");
+		online = yml.getBoolean("settings.ignore_online");
+		essentials = yml.getBoolean("settings.essentials");
+		respect = yml.getBoolean("settings.respect_cancelled");
 	}
 
 	public String getMessage(Message msg) {
@@ -68,6 +69,10 @@ public class CustomConfig {
 
 	public boolean essMode() {
 		return essentials;
+	}
+
+	public boolean respectCancelled() {
+		return respect;
 	}
 
 	private String clr(String s) {

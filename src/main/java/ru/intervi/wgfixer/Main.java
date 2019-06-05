@@ -50,6 +50,8 @@ public class Main extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
+		if(event.isCancelled() && cfg.respectCancelled())
+			return;
 		Player player = event.getPlayer();
 		String[] cmd = event.getMessage().toLowerCase().split(" ");
 		// Является ли введенная команда командой WG
@@ -72,6 +74,7 @@ public class Main extends JavaPlugin implements Listener {
 			return;
 		}
 
+		// TODO: RM и RO поддерживаю несколько игроков
 		// Заглушка для слишком большого кол-ва аргументов
 		if(cmd.length > 6) {
 			player.sendMessage(cfg.getMessage(Message.TOO_MANY_ARGS));

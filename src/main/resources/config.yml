@@ -6,6 +6,8 @@ settings:
   ignore_online: true
   # essentials - использовать ли алгоритм поиска uuid через essentials
   essentials: true
+  # respect_cancelled - не проводить действия, если событие команды было отменено
+  respect_cancelled: true
 messages:
   too_many_args: "&cВ веденной вами команде слишком много аргументов."
   world:
