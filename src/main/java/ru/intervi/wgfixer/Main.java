@@ -74,7 +74,7 @@ public class Main extends JavaPlugin implements Listener {
 			return;
 		}
 
-		// TODO: RM и RO поддерживаю несколько игроков
+		// TODO: RM и RO поддерживают несколько игроков
 		// Заглушка для слишком большого кол-ва аргументов
 		if(cmd.length > 6) {
 			player.sendMessage(cfg.getMessage(Message.TOO_MANY_ARGS));
